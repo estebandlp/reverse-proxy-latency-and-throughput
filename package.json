@@ -1,0 +1,25 @@
+{
+  "name": "latency_throughput_example",
+  "version": "1.0.0",
+  "description": "Project to demonstrate the difference between latency and throughput",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "benchmark": "./scripts/load-test.sh"
+  },
+  "keywords": [
+    "latency",
+    "throughput",
+    "nodejs",
+    "nginx",
+    "performance"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "morgan": "^1.10.0"
+  }
+}
