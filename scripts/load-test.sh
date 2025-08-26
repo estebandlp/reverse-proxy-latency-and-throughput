@@ -26,7 +26,7 @@ run_benchmark() {
     echo -e "${GREEN}===============================================${NC}"
     
     # Run Apache Benchmark and save results
-    ab -c ${CONCURRENCY} -n ${REQUESTS} "${HOST}${endpoint}" > "benchmarkResults/benchmark_${endpoint#/}.txt"
+    ab -c "${CONCURRENCY}" -n "${REQUESTS}" "${HOST}${endpoint}" > "benchmarkResults/benchmark_${endpoint#/}.txt"
     
     # Extract and display key metrics
     REQUESTS_PER_SEC=$(grep "Requests per second" "benchmarkResults/benchmark_${endpoint#/}.txt" | awk '{print $4}')
