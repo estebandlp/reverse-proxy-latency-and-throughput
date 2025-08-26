@@ -27,6 +27,8 @@ Latency and throughput are inversely related. As latency increases, throughput o
 ## Project Structure
 
 ```
+├── benchmarkResults/
+│   └── benchmark_*.txt    # Benchmark results (generated after testing)
 ├── config/
 │   └── nginx.conf          # Nginx configuration for reverse proxy
 ├── scripts/
@@ -140,6 +142,17 @@ Arguments:
 2. Concurrency level (default: 100)
 3. Total requests (default: 1000)
 
+### Benchmark Results Storage
+
+After running the benchmark, all results are automatically saved in the `benchmarkResults/` directory:
+
+- `benchmark_fast.txt` - Results for the fast endpoint
+- `benchmark_slow.txt` - Results for the slow endpoint  
+- `benchmark_memory.txt` - Results for the memory-like endpoint
+- `benchmark_database.txt` - Results for the database-like endpoint
+
+These files contain detailed Apache Benchmark (ab) output that you can analyze later or share with your team.
+
 ### Step 5: Verify Reverse Proxy Setup
 
 Test that the reverse proxy is working correctly:
@@ -166,12 +179,89 @@ Run benchmarks to compare direct vs proxy latencies:
 
 The difference in latencies demonstrates the overhead added by the reverse proxy layer.
 
+### Step 7: Analyze Saved Results
+
+After running benchmarks, examine the detailed results:
+
 ## Understanding the Results
 
-The benchmark produces two key metrics:
+### Key Metrics Explained
+
+The benchmark produces several important metrics displayed both in the console and saved in the result files:
 
 1. **Throughput (Requests per second)**: The number of requests the system can handle per second.
-2. **Latency (Time per request)**: The time taken for each request to complete.
+2. **Mean Latency (Time per request)**: The average time taken for each request to complete.
+3. **P95 Latency (95th percentile)**: 95% of requests complete within this time - crucial for understanding worst-case scenarios.
+
+### Console Output
+
+When you run the benchmark, you'll see real-time results like this:
+
+```
+=== Latency & Throughput Test ===
+Host: http://localhost
+Concurrency: 100
+Total Requests: 1000
+
+Testing Fast Endpoint - http://localhost/fast
+===============================================
+Results:
+- Throughput: 2847.33 requests/second
+- Mean Latency: 35.12 ms
+- P95 Latency: 45 ms
+
+Full results saved to: benchmarkResults/benchmark_fast.txt
+
+Testing Slow Endpoint - http://localhost/slow  
+===============================================
+Results:
+- Throughput: 95.24 requests/second
+- Mean Latency: 1049.87 ms
+- P95 Latency: 1055 ms
+
+Full results saved to: benchmarkResults/benchmark_slow.txt
+
+=== Comparison Analysis ===
+- The slow endpoint has -96.66% lower throughput than the fast endpoint.
+- The slow endpoint has 2889.12% higher latency than the fast endpoint.
+
+This demonstrates how latency directly impacts overall system throughput.
+When latency increases, the system can handle fewer requests per second.
+```
+
+### Detailed Result Files
+
+Each benchmark file in `benchmarkResults/` contains comprehensive Apache Benchmark output including:
+
+- **Connection and request statistics**
+- **Time distribution percentiles** (50%, 66%, 75%, 80%, 90%, 95%, 98%, 99%, 100%)
+- **Transfer rate and data statistics**
+- **Concurrency level performance**
+
+### How to Interpret the Metrics
+
+#### Throughput (Requests/Second)
+- **Higher is better**: More requests processed = better system capacity
+- **Typical ranges**:
+  - Fast endpoints: 1,000-10,000+ RPS
+  - Database-heavy endpoints: 100-1,000 RPS
+  - Slow/network endpoints: 10-100 RPS
+
+#### Mean Latency
+- **Lower is better**: Faster response times = better user experience
+- **Typical ranges**:
+  - Memory operations: 1-10ms
+  - Database queries: 10-100ms
+  - Network calls: 100-1000ms+
+
+#### P95 Latency (95th Percentile)
+- **Critical for SLA planning**: Represents worst-case scenarios for most users
+- **Rule of thumb**: P95 should be ≤ 2x mean latency for consistent performance
+- **High P95 indicates**: Inconsistent performance, possible bottlenecks
+
+#### Comparison Analysis
+- **Throughput difference**: Shows percentage impact of latency on system capacity
+- **Latency difference**: Quantifies performance degradation between endpoints
 
 ### Expected Results
 
@@ -195,17 +285,50 @@ The benchmark demonstrates different latency scenarios that mirror real-world sy
 
 ### Analyzing the Results
 
-The results demonstrate that:
-1. **Latency directly impacts throughput**: The 2-second delay in the `/slow` endpoint drastically reduces throughput.
-2. **Concurrency helps mitigate latency**: Even with high latency, increased concurrency can maintain throughput up to a point.
+The results demonstrate several key performance principles:
+
+1. **Latency directly impacts throughput**: The 1-second delay in the `/slow` endpoint drastically reduces throughput (often by 90%+ compared to the fast endpoint).
+
+2. **Concurrency helps mitigate latency**: Even with high latency, increased concurrency can maintain throughput up to a point, but there are diminishing returns.
+
+3. **P95 latency reveals consistency**: 
+   - Consistent endpoints: P95 ≈ 1.5-2x mean latency
+   - Inconsistent endpoints: P95 >> 2x mean latency
+
+4. **Real-world latency mapping**:
+   - Memory endpoint (~1ms): Simulates in-memory cache hits
+   - Database endpoint (~20ms): Simulates typical database queries
+   - Slow endpoint (~1000ms): Simulates external API calls or complex operations
+
+### Warning Signs in Results
+
+- **P95 >> 3x Mean**: Indicates performance inconsistency or bottlenecks
+- **Low throughput with low latency**: Suggests CPU or connection limits
+- **High variance in percentiles**: Points to resource contention or garbage collection issues
 
 ## Real-world Applications
 
 Understanding the relationship between latency and throughput is crucial for:
 
-1. **Backend Optimization**: Reducing database query times or API call latency to improve overall throughput
-2. **Infrastructure Scaling**: Deciding between vertical scaling (faster machines) or horizontal scaling (more machines)
-3. **Client-side Performance**: Implementing techniques like caching and lazy loading to improve UX
+1. **Backend Optimization**: 
+   - Reducing database query times or API call latency to improve overall throughput
+   - Identifying bottlenecks through P95 latency analysis
+   - Optimizing code paths that show high latency variance
+
+2. **Infrastructure Scaling**: 
+   - Deciding between vertical scaling (faster machines) or horizontal scaling (more machines)
+   - Setting appropriate concurrency limits based on latency characteristics
+   - Planning capacity based on throughput requirements and latency constraints
+
+3. **Client-side Performance**: 
+   - Implementing techniques like caching and lazy loading to improve UX
+   - Setting appropriate timeout values based on P95 latency metrics
+   - Understanding user experience impact of backend latency
+
+4. **SLA and Monitoring**: 
+   - Using P95 latency for realistic SLA targets
+   - Setting up alerts based on throughput degradation patterns
+   - Establishing performance baselines for regression testing
 
 ## License
 

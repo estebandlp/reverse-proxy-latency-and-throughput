@@ -26,19 +26,19 @@ run_benchmark() {
     echo -e "${GREEN}===============================================${NC}"
     
     # Run Apache Benchmark and save results
-    ab -c ${CONCURRENCY} -n ${REQUESTS} "${HOST}${endpoint}" > "benchmark_${endpoint#/}.txt"
+    ab -c ${CONCURRENCY} -n ${REQUESTS} "${HOST}${endpoint}" > "benchmarkResults/benchmark_${endpoint#/}.txt"
     
     # Extract and display key metrics
-    REQUESTS_PER_SEC=$(grep "Requests per second" "benchmark_${endpoint#/}.txt" | awk '{print $4}')
-    MEAN_LATENCY=$(grep "Time per request" "benchmark_${endpoint#/}.txt" | head -1 | awk '{print $4}')
-    P95_LATENCY=$(grep "95%" "benchmark_${endpoint#/}.txt" | awk '{print $2}')
+    REQUESTS_PER_SEC=$(grep "Requests per second" "benchmarkResults/benchmark_${endpoint#/}.txt" | awk '{print $4}')
+    MEAN_LATENCY=$(grep "Time per request" "benchmarkResults/benchmark_${endpoint#/}.txt" | head -1 | awk '{print $4}')
+    P95_LATENCY=$(grep "95%" "benchmarkResults/benchmark_${endpoint#/}.txt" | awk '{print $2}')
     
     echo -e "${BLUE}Results:${NC}"
     echo -e "- Throughput: ${GREEN}${REQUESTS_PER_SEC} requests/second${NC}"
     echo -e "- Mean Latency: ${GREEN}${MEAN_LATENCY} ms${NC}"
     echo -e "- P95 Latency: ${GREEN}${P95_LATENCY} ms${NC}"
     echo ""
-    echo -e "Full results saved to: benchmark_${endpoint#/}.txt"
+    echo -e "Full results saved to: benchmarkResults/benchmark_${endpoint#/}.txt"
     echo ""
 }
 
@@ -59,10 +59,10 @@ run_benchmark "/memory" "Memory-like Endpoint (1ms)"
 run_benchmark "/database" "Database-like Endpoint (20ms)"
 
 echo -e "${BLUE}=== Comparison Analysis ===${NC}"
-FAST_RPS=$(grep "Requests per second" "benchmark_fast.txt" | awk '{print $4}')
-SLOW_RPS=$(grep "Requests per second" "benchmark_slow.txt" | awk '{print $4}')
-FAST_LATENCY=$(grep "Time per request" "benchmark_fast.txt" | head -1 | awk '{print $4}')
-SLOW_LATENCY=$(grep "Time per request" "benchmark_slow.txt" | head -1 | awk '{print $4}')
+FAST_RPS=$(grep "Requests per second" "benchmarkResults/benchmark_fast.txt" | awk '{print $4}')
+SLOW_RPS=$(grep "Requests per second" "benchmarkResults/benchmark_slow.txt" | awk '{print $4}')
+FAST_LATENCY=$(grep "Time per request" "benchmarkResults/benchmark_fast.txt" | head -1 | awk '{print $4}')
+SLOW_LATENCY=$(grep "Time per request" "benchmarkResults/benchmark_slow.txt" | head -1 | awk '{print $4}')
 
 # Calculate throughput difference
 THROUGHPUT_DIFF=$(echo "scale=2; ($FAST_RPS - $SLOW_RPS) / $SLOW_RPS * 100" | bc)
