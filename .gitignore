@@ -5,16 +5,6 @@ yarn-error.log
 yarn-debug.log
 package-lock.json
 
-# Benchmark results
-benchmark_*.txt
-
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
 # Logs
 logs
 *.log
@@ -28,9 +18,4 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo 
-
-# Nginx config
-nginx.conf
-
-# Load test script
-load-test.sh
+ 

@@ -45,7 +45,7 @@ app.get("/slow", (req, res) => {
   }, 1000);
 });
 
-// New endpoint to demonstrate different latency orders of magnitude
+// Endpoints to demonstrate different latency orders of magnitude
 app.get("/database", (req, res) => {
   // Simulate database query latency (20ms - similar to HDD read)
   setTimeout(() => {
@@ -63,10 +63,7 @@ app.get("/memory", (req, res) => {
 // Health check endpoint
 app.get("/health", (req, res) => {
   console.log("All headers:", req.headers);
-  
-  // Simplemente verificamos si el tráfico pasó por Nginx
-  const viaNginx = req.headers["x-via-nginx"] ? true : false;
-  
+  const viaNginx = req.headers["x-via-nginx"] ? true : false; 
   res.status(200).send(`OK - Via Nginx: ${viaNginx} \n`);
 });
 
@@ -75,6 +72,9 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`- Fast endpoint: http://localhost:${PORT}/fast`);
   console.log(`- Slow endpoint: http://localhost:${PORT}/slow`);
+  console.log(`- Database endpoint: http://localhost:${PORT}/database`);
+  console.log(`- Memory endpoint: http://localhost:${PORT}/memory`);
+  console.log(`- Health endpoint: http://localhost:${PORT}/health`);
 });
 
 module.exports = app;
